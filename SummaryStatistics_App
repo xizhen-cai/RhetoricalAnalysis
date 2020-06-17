@@ -1,0 +1,159 @@
+library(shiny)
+require(reshape2)
+require(ggplot2)
+require(gghighlight)
+require(ggridges)
+require(kableExtra)
+require(ggpubr)
+require(dplyr)
+require(ggiraph)
+require(stringr)
+require(ggalt)
+
+# Read csv file into dataframe and 
+SPEECHES <- read.csv("Freq_CLUSTER.csv")
+speech.melt = melt(SPEECHES, id = 1, measure = names(SPEECHES[6:33]))
+
+ggp <- ggplot(speech.melt, 
+              aes(
+                  x = reorder(variable, -value, median), 
+                  y = value)) + 
+    geom_boxplot(color = "red") + 
+    theme_bw() + 
+    theme(legend.position = "none", 
+          plot.title = element_text(size = 16, face = "bold"),
+          plot.subtitle = element_text(size = 14, face =),
+          axis.title=element_text(size=14,face="bold"),
+          axis.text.x = element_text(angle = 90, hjust=0.95, vjust=0.2, size = 12),  
+          axis.line = element_line(colour = "grey")) +
+    labs(title = "Frequency of Rhetorical Clusters", subtitle = "Over select speeches", x = "Rhetorical Clusters", y = "Frequency") 
+
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    
+    titlePanel("Interactive Cluster Frequencies"),
+    hr(),
+    fluidRow(
+        column(12,
+               h3("Cluster Summary"),
+               
+               h5(em(
+                   "The graph below shows the distribution of each rhetorical cluster for all speeches in the 'Freq_CLUSTER.csv' file. 
+                             The drop down menu under that allows users to select individual speeches they would like to view 
+                             distribution information on"
+               ))
+        )
+    ),
+    br(),
+    fluidRow(
+        column(8,
+               plotOutput("graph", height = 500)
+        ),
+        column(4,
+               tags$div(
+                   selectInput("speech", label = h5("Speeches"), 
+                               choices = (SPEECHES$Fulltag),
+                               width = 400)
+               )
+        )
+    ),
+    
+    tags$hr(style = "border-color: black"),
+    
+    fluidRow(
+        column(12,
+               h3("Univariate Distributions"),
+               h5(em(
+                   "The ridge chart below illustrates the univariate dispersion of frequencies by topic over Clinton's different roles.
+                    Use the drop-down menu to select a rhetorical cluster"
+               ))
+        )
+    ),
+    
+    br(),
+    
+    fluidRow(
+        column(3,
+               selectInput("cluster", label = h5("Rhetorical Clusters"), 
+                           choices = names(SPEECHES[6:33])),
+               br(), 
+               h5("Distribution Summary"),
+               verbatimTextOutput("summary")
+        ),
+        column(4,
+               plotOutput("bar", height = 500)
+        ),
+        column(5,
+               plotOutput("ridge", height = 500),
+               br()
+        ),
+    )
+)
+
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+    
+    col <- reactive({
+        grep(input$cluster, colnames(SPEECHES))
+    })
+    
+    
+    output$graph <- renderPlot({
+        # ggboxplot <- 
+        ggp + gghighlight(speech.melt$Fulltag == input$speech, use_direct_label = F)
+        # ggarrange(ggboxplot, gghist, widths = c(5,3))
+    },
+    width = "auto",
+    height = "auto"
+    )   
+    
+    output$ridge <- renderPlot({
+        ridgePlot <- ggplot(data = SPEECHES, aes_string(x = input$cluster, y = "Role", fill = "Topic")) + 
+            stat_density_ridges(
+                quantile_lines = T,
+                quantiles = 2,
+                alpha = 0.4, scale = 1
+            ) +
+            theme_ridges() + 
+            labs(title = "Distribution of Rhetorical Cluster \nFrequency over Topic and Role") +
+            xlim(-3, 18) +
+            theme(plot.title = element_text(size = 16, face = "bold"), 
+                  axis.title=element_text(size=14,face="bold"),
+                  legend.position = "bottom"
+            )
+        ridgePlot
+    })
+    
+    output$bar <- renderPlot({
+        histPlot <- ggplot(data = SPEECHES, aes_string(x = input$cluster)) +
+            geom_histogram(alpha = 0.5, colour="black", fill="white", binwidth = 0.5) +
+            theme_bw() + 
+            theme(plot.title = element_text(size = 16, face = "bold"),
+                  axis.title=element_text(size=14,face="bold", hjust = 0.5 ),
+                  panel.background = element_blank(), 
+                  axis.line = element_line(colour = "grey"),
+                  axis.title.y = element_text(hjust=1),
+                  legend.position = "bottom",
+                  legend.title = element_text(size = 14),
+                  legend.text = element_text(size=14)
+            ) +
+            labs(title = "General Distribution of \nRhetorical Cluster Frequency", x = "Frequency", y = "Count") +
+            xlim(-3, 18) + 
+            geom_vline(aes(xintercept=median(SPEECHES[,col()]),
+                           color="median"), linetype="dashed", size=1) +
+            geom_vline(aes(xintercept=mean(SPEECHES[,col()]),
+                           color="mean"), linetype="dashed", size=1) + 
+            scale_color_manual(name = "Statistics", values = c(median = "blue", mean = "red"))
+        histPlot
+    })
+    
+    output$summary <- renderPrint({
+        # summary(subset(SPEECHES, Role = "USS", Topic = "Health", select = input$cluster))
+        summary(SPEECHES[col()])
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
