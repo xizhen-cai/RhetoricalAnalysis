@@ -10,152 +10,125 @@ require(ggalt)
 require(plotly)
 require(DT)
 
-
+# Read dataframe in
 SPEECHES <- read.csv("Freq_CLUSTER.csv")
-SPEECHES$Academic_percentile <- ecdf(SPEECHES$Academic_Language..Low.Frequency.)(SPEECHES$Academic_Language..Low.Frequency.)
-SPEECHES$Public_percentile <- ecdf(SPEECHES$Public)(SPEECHES$Public)
-SPEECHES$Emotion_Negative_percentile <- ecdf(SPEECHES$Emotion_Negative)(SPEECHES$Emotion_Negative)
-SPEECHES$Relations_Negative_percentile <- ecdf(SPEECHES$Relations_Negative)(SPEECHES$Relations_Negative)
-SPEECHES$Values_Negative_percentile <- ecdf(SPEECHES$Values_Negative)(SPEECHES$Values_Negative)
-SPEECHES$FirstPerson_percentile <- ecdf(SPEECHES$FirstPerson)(SPEECHES$FirstPerson)
-SPEECHES$Interactive_percentile <- ecdf(SPEECHES$Interactive)(SPEECHES$Interactive)
-SPEECHES$Reasoning_percentile <- ecdf(SPEECHES$Reasoning)(SPEECHES$Reasoning)
-SPEECHES$Emotion_Positive_percentile <- ecdf(SPEECHES$Emotion_Positive)(SPEECHES$Emotion_Positive)
-SPEECHES$Relations_Positive_percentile <- ecdf(SPEECHES$Relations_Positive)(SPEECHES$Relations_Positive)
-SPEECHES$Values_Positive_percentile <- ecdf(SPEECHES$Values_Positive)(SPEECHES$Values_Positive)
-SPEECHES <- SPEECHES %>% mutate_at(vars(Academic_percentile, Public_percentile, Emotion_Negative_percentile, Relations_Negative_percentile,
-                                        Values_Negative_percentile, FirstPerson_percentile, Interactive_percentile, Reasoning_percentile,
-                                        Emotion_Positive_percentile, Relations_Positive_percentile, Values_Positive_percentile),
-                                   funs(round(.,4)))
-
-SPEECHES_profile1 <- SPEECHES[,c(1:6, 13, 26, 29, 33)]
-colnames(SPEECHES_profile1)[6] <- "Academic"
-
-p1main.melt = melt(SPEECHES_profile1, id = 1, measure = names(SPEECHES_profile1[c(6,8)]))
-p1secondary.melt = melt(SPEECHES_profile1, id = 1, measure = names(SPEECHES_profile1[c(7,9:10)]))
-
-p1main <- ggplot(p1main.melt,
-                 aes(
-                     x = variable,
-                     y = value)) +  
-    geom_boxplot(color = "red") + 
-    ylim(0,17) +
-    labs(title = "Info Profile Frequencies", x = "Main Clusters", y = "Frequency") +
-    theme(plot.title = element_text(size = 16, face = "bold"),
-          plot.subtitle = element_text(size = 14, face =),
-          axis.title=element_text(size=14,face="bold"),
-          axis.text.x = element_text(size = 14),
-          axis.line = element_line(colour = "grey"),
-          axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
-          panel.background = element_rect(fill = "white"),
-          panel.grid.major = element_line(colour = "grey90", size = 0.2),
-          panel.grid.minor = element_line(colour = "grey98", size = 0.5),
-          strip.background = element_rect(fill = "grey80", colour = "grey50")
-    )
-
-p1secondary <- ggplot(p1secondary.melt,
-                      aes(
-                          x = variable,
-                          y = value)) + 
-    geom_boxplot(color = "steelblue2") +
-    ylim(0,17) + 
-    theme(axis.line.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.title.y = element_blank(),
-          plot.title = element_text(size = 16, face = "bold"),
-          plot.subtitle = element_text(size = 14, face =),
-          axis.title=element_text(size=14,face="bold"),
-          axis.text.x = element_text(size = 11),
-          axis.line = element_line(colour = "grey"),
-          axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
-          panel.background = element_rect(fill = "white"),
-          panel.grid.major = element_line(colour = "grey90", size = 0.2),
-          panel.grid.minor = element_line(colour = "grey98", size = 0.5),
-          strip.background = element_rect(fill = "grey80", colour = "grey50")) +
-    labs(x = "Secondary Clusters", title = "")
-
-
-# ggplot(profile1.melt, 
-#            aes(
-#                x = variable, 
-#                y = value)) + 
-# geom_boxplot(color = "red") + 
-# theme_bw() + 
-# theme(legend.position = "none", 
-#       plot.title = element_text(size = 16, face = "bold"),
-#       plot.subtitle = element_text(size = 14, face =),
-#       axis.title=element_text(size=14,face="bold"),
-#       axis.text.x = element_text(size = 14),  
-#       axis.line = element_line(colour = "grey"),
-#       axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0))) +
-# facet_grid(~grouping, scales = "free") +
-# labs(title = "Info Profile Frequencies", x = "Rhetorical Clusters", y = "Frequency") 
-
-SPEECHES_profile2 <- SPEECHES[,c(1:5,12, 16, 20, 27, 28, 32)]
-
-p2main.melt = melt(SPEECHES_profile2, id = 1, measure = names(SPEECHES_profile2[7:9]))
-p2secondary.melt = melt(SPEECHES_profile2, id = 1, measure = names(SPEECHES_profile2[c(6,10:11)]))
-    
-p2main <- ggplot(p2main.melt,
-                 aes(
-                     x = variable,
-                     y = value)) +  
-    geom_boxplot(color = "red") + 
-    ylim(0,17) +
-    labs(title = "Involvement Profile Frequencies", x = "Main Clusters", y = "Frequency") +
-    theme(plot.title = element_text(size = 16, face = "bold"),
-          plot.subtitle = element_text(size = 14, face =),
-          axis.title=element_text(size=14,face="bold"),
-          axis.text.x = element_text(size = 14),
-          axis.line = element_line(colour = "grey"),
-          axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
-          panel.background = element_rect(fill = "white"),
-          panel.grid.major = element_line(colour = "grey90", size = 0.2),
-          panel.grid.minor = element_line(colour = "grey98", size = 0.5),
-          strip.background = element_rect(fill = "grey80", colour = "grey50")
-    )
-
-p2secondary <- ggplot(p2secondary.melt,
-                      aes(
-                          x = variable,
-                          y = value)) + 
-    geom_boxplot(color = "steelblue2") +
-    ylim(0,17) + 
-    theme(axis.line.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.title.y = element_blank(),
-          plot.title = element_text(size = 16, face = "bold"),
-          plot.subtitle = element_text(size = 14, face =),
-          axis.title=element_text(size=14,face="bold"),
-          axis.text.x = element_text(size = 11),
-          axis.line = element_line(colour = "grey"),
-          axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
-          panel.background = element_rect(fill = "white"),
-          panel.grid.major = element_line(colour = "grey90", size = 0.2),
-          panel.grid.minor = element_line(colour = "grey98", size = 0.5),
-          strip.background = element_rect(fill = "grey80", colour = "grey50")) +
-    labs(x = "Secondary Clusters", title = "")
-
-
+sparseScores <- read.csv("FinalSparsePCAscores_3PCs.csv")
 loadings <- read.csv("loadings.csv")
-
 scores <- read.csv("scores.csv")
-scores$Role <- SPEECHES[,2]
-scores$Topic <- SPEECHES[,3]
+
+# Clean nonsparse scores dataframe for 'Scores and Loadings Analysis' section (which uses nonsparse)
+scores$Role <- scoredSpeeches[,2]
+scores$Topic <- scoredSpeeches[,3]
 scores$X_woq <- str_replace_all(scores$X, "'", "")
 scores$Unfiltered <- c("")
 
-sparseScores <- read.csv("FinalSparsePCAscores_3PCs.csv")
+# Clean sparseScores dataframe
 colnames(sparseScores) <- c("Fulltag", "Role", "Topic", "PC1", "PC2", "PC3")
 sparseScores$X_woq <- str_replace_all(sparseScores$Fulltag, "'", "")
+
+# Order both SPEECHES and scores dataframes in preparation to merge accurately
+scoredSpeeches <- SPEECHES[order(SPEECHES$Fulltag),]
+scoresOrdered <- sparseScores[order(sparseScores$Fulltag),]
+
+# Merge PC scores and SPEECHES dataframes
+scoredSpeeches$PC1 <- scoresOrdered$PC1
+scoredSpeeches$PC2 <- scoresOrdered$PC2
+scoredSpeeches <- scoredSpeeches[order(-scoredSpeeches$PC1),]
+
+# Rename scoredSpeeches columns for convenience
+colnames(scoredSpeeches)[6] <- "Academic"
+colnames(scoredSpeeches)[12] <- "EmotionPos"
+colnames(scoredSpeeches)[13] <- "EmotionNeg"
+colnames(scoredSpeeches)[28] <- "RelationsPos"
+colnames(scoredSpeeches)[29] <- "RelationsNeg"
+colnames(scoredSpeeches)[32] <- "ValuesPos"
+colnames(scoredSpeeches)[33] <- "ValuesNeg"
+
+# Create percentile columns for all profile clusters
+## Create list of strings of clusters to be iterated over
+profileClusters <- c(names(scoredSpeeches)[c(6,26,16,20,27,13,12,29,28,33,32,25,8,17,24)])
+## Iterate over list and create new percentile columns for each variable string
+for(i in profileClusters) {
+    percentileString <- paste(i, "_percentile", sep = "")
+    scoredSpeeches[,percentileString] <- ecdf(scoredSpeeches[,i])(scoredSpeeches[,i])
+}
+
+# Round percentile colunms to 4 decimal places for convenience
+scoredSpeeches <- scoredSpeeches %>% 
+    mutate_at(vars(Academic_percentile, Public_percentile, EmotionNeg_percentile, RelationsNeg_percentile,
+                   ValuesNeg_percentile, FirstPerson_percentile, Interactive_percentile, Reasoning_percentile,
+                   EmotionPos_percentile, RelationsPos_percentile, ValuesPos_percentile, Privy_percentile, 
+                   Contingency_percentile, Forceful_percentile, Persons_percentile), 
+              funs(round(.,4)))
+
+# PC1 Profiles (for boxplots)
+PC1Profile <- scoredSpeeches[,c(1, 35, 6, 26, 13, 29, 33, 16, 20, 27, 12, 28, 32)]
+infoMain.melt <- melt(PC1Profile, id = c(1,2), measure = names(PC1Profile[3:4])) ## Informational melts
+involveMain.melt <- melt(PC1Profile, id = c(1,2), measure = names(PC1Profile[8:10])) ## Involvement melts
+
+# PC2
+PC2Profile <- scoredSpeeches[,c(1,36,25,8,17,24)]
+divisionMain.melt <- melt(PC2Profile, id = c(1,2), measure = names(PC2Profile[3:5])) ## Division Profile melts
+unityMain.melt <- melt(PC2Profile, id = c(1,2), measure = names(PC2Profile[6])) ## Unity Profile melts
+
+# General secondary melts (secondary clusters remain the same across PC1 and PC2)
+p1Secondary.melt <- melt(PC1Profile, id = c(1,2), measure = names(PC1Profile[c(5:7)]))
+p2Secondary.melt <- melt(PC1Profile, id = c(1,2), measure = names(PC1Profile[c(11:13)]))
+
+## Profile 1 boxplot functions and initializations
+plot_mainProfile <- function(d, t, m) {
+    ggplot(d,
+           aes(
+               x = variable,
+               y = value)) +  
+        geom_boxplot(color = "red") + 
+        ylim(0,m) +
+        labs(title = t, x = "Main Clusters", y = "Frequency") +
+        theme(plot.title = element_text(size = 16, face = "bold"),
+              plot.subtitle = element_text(size = 14, face =),
+              axis.title=element_text(size=14,face="bold"),
+              axis.text.x = element_text(size = 14),
+              axis.line = element_line(colour = "grey"),
+              axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
+              panel.background = element_rect(fill = "white"),
+              panel.grid.major = element_line(colour = "grey90", size = 0.2),
+              panel.grid.minor = element_line(colour = "grey98", size = 0.5),
+              strip.background = element_rect(fill = "grey80", colour = "grey50")
+        )
+}
+plot_secondaryProfile <- function(d, m) {
+    ggplot(d,
+           aes(
+               x = variable,
+               y = value)) + 
+        geom_boxplot(color = "steelblue2") +
+        ylim(0,m) + 
+        theme(axis.line.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank(),
+              axis.title.y = element_blank(),
+              plot.title = element_text(size = 16, face = "bold"),
+              plot.subtitle = element_text(size = 14, face =),
+              axis.title=element_text(size=14,face="bold"),
+              axis.text.x = element_text(size = 11),
+              axis.line = element_line(colour = "grey"),
+              axis.title.x = element_text(margin = margin(t = 7, r = 0, b = 0, l = 0)),
+              panel.background = element_rect(fill = "white"),
+              panel.grid.major = element_line(colour = "grey90", size = 0.2),
+              panel.grid.minor = element_line(colour = "grey98", size = 0.5),
+              strip.background = element_rect(fill = "grey80", colour = "grey50")) +
+        labs(x = "Secondary Clusters", title = "")
+}
+
+
+## Since scoredSpeeches is ranked according to PC1 already, separate ordered vector to keep track of PC2 top/bottom amounts
+orderPC2 <- sort(scoredSpeeches[,"PC2"], decreasing = T)
 
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     
-    titlePanel("Interactive PCA Visualization"),
+    titlePanel("Interactive PCA Analysis"),
     
     hr(),
     
@@ -164,118 +137,123 @@ ui <- fluidPage(
                  fluidRow(
                      column(12,
                             h3("Principle Component Loadings"),
-                            h5(em(
-                                "The below bar plot shows the loading values of select Principle Components. The clusters are sorted in descending order
-                    of absolute value to indiciate which rhetorical clusters have the greatest imapact."
-                            )),
+                            h5(em("The below bar plot shows the loading values of select Principle Components. The clusters are sorted in 
+                            descending order of absolute value to indiciate which rhetorical clusters have the greatest imapact."))
                      )
                  ),
                  br(),
                  fluidRow(
-                     column(8,
-                            plotOutput("loadingPlot", height = 600),
-                     ),
-                     column(4,
-                            tags$div(
-                                selectInput("loadingPC", label = h5("Principle Components"),
-                                            choices = c(
-                                                "PC1" = "Comp.1",
-                                                "PC2" = "Comp.2", 
-                                                "PC3" = "Comp.3"
-                                            ),
-                                            width = 110)
-                            ),
-                            h5("Most Impacful Clusters"),
-                            verbatimTextOutput("loadingStats")
+                     column(8, plotOutput("loadingPlot", height = 600)),
+                     column(4, tags$div(
+                         selectInput("loadingPC", label = h5("Principle Components"),
+                                     choices = c(
+                                         "PC1" = "Comp.1",
+                                         "PC2" = "Comp.2", 
+                                         "PC3" = "Comp.3"),
+                                     width = 110)),
+                         h5("Most Impacful Clusters"),
+                         verbatimTextOutput("loadingStats")
                      )
                  ),
-                 
                  hr(),
-                 
-                 fluidRow(
-                     column(12,
-                            h3("Principle Component Scores"),
-                            
-                            h5(em(
-                                "The below graph plots Principle Component 2 scores against Principle Component 1 scores for every speech.
-                    Use the drop down menu to select which criteria you would like to filter/highlight on the plot. 
-                    Colored lines encircle clusters, based on the selected filtering criteria."
-                            ))
-                     )
-                 ),
-                 
+                 fluidRow(column(12, 
+                                 h3("Principle Component Scores"), 
+                                 h5(em("The below graph plots Principle Component 2 scores against Principle Component 1 
+                                 scores for every speech. Use the drop down menu to select which criteria you would like 
+                                 to filter/highlight on the plot. Colored lines encircle clusters, based on the selected filtering criteria."))
+                 )),
                  br(), 
                  fluidRow(
-                     column(7,
-                            girafeOutput("scorePlot", height = 500, width = "1000px")
-                     ),
-                     column(5,
-                            tags$div(
-                                selectInput("chooseColor", label = h5("Filter:"),
-                                            choices = c(
-                                                "Topic" = "Topic",
-                                                "Role" = "Role", 
-                                                "None" = "Unfiltered"
-                                            ),
-                                            selected = "Unfiltered",
-                                            width = 110)),
-                            sidebarPanel(
-                                h5("Principal Component Breakdowns"),
-                                verbatimTextOutput("loadingSummary1"),
-                                verbatimTextOutput("loadingSummary2"),
-                                width = 11)
+                     column(7, girafeOutput("scorePlot", height = 500, width = "1000px")),
+                     column(5, tags$div(
+                         selectInput("chooseColor", label = h5("Filter:"),
+                                     choices = c(
+                                         "Topic" = "Topic",
+                                         "Role" = "Role", 
+                                         "None" = "Unfiltered"),
+                                     selected = "Unfiltered",
+                                     width = 110)),
+                         sidebarPanel(
+                             h5("Principal Component Breakdowns"),
+                             verbatimTextOutput("loadingSummary1"),
+                             verbatimTextOutput("loadingSummary2"),
+                             width = 11)
                      )
                  )
         ),
-        tabPanel("Profile Analysis",
+        
+        tabPanel("Profile Analysis I",
                  fluidRow(
                      column(12,
                             h3("PC Profile Analyses"),
-                            
-                            h5(em(
-                                "Selecting a point on the below sparse PCA plot will bring up the corresponding point and percentile on the rhetorical clusters of each profile.")),
-                            h5(em("If instead you would like to search for a specific speech, please choose from the drop down menu and click the highlighted point on PCA plot to bring up the profile statistics."
-                            ))
+                            h5(em("Selecting a point on the below sparse PCA plot will bring up the corresponding point and 
+                                  percentile on the rhetorical clusters of each profile.")),
+                            h5(em("If instead you would like to search for a specific speech, please choose from the drop 
+                                  down menu and click the highlighted point on PCA plot to bring up the profile statistics."))
                      )
                  ),
                  fluidRow(
-                     column(6,
-                            tags$div(
-                                selectInput("choosePoint", label = h5("Find Speech:"),
-                                            choices = SPEECHES$Fulltag, width = 400)
-                            ))
+                     column(2,
+                            radioButtons("tab2.choosePC", label = h5("Select a principle component"),
+                                         choices = c("PC 1" = "PC1", "PC 2" = "PC2"), inline = T)
+                     ),
+                     column(4, tags$div(
+                         selectInput("choosePoint", label = h5("Find Speech:"),choices = scoredSpeeches$Fulltag, width = 400))),
                  ),
+                 fluidRow(column(12, plotlyOutput("sparsePlot", height = 500))),
+                 fluidRow(column(5, verbatimTextOutput("click_info"))),
+                 hr(),
                  fluidRow(
-                     column(12,
-                            plotlyOutput("sparsePlot",
-                                         height = 700)
-                     )
+                     column(3, style = 'padding-right:0px;', plotOutput("profile1_main_plot", height = 300)),
+                     column(3, plotOutput("profile1_secondary_plot", height = 300)),
+                     column(3, style = 'padding-right:0px;', plotOutput("profile2_main_plot", height = 300)),
+                     column(3, plotOutput("profile2_secondary_plot", height = 300))
                  ),
+                 fluidRow(hr()),
+                 fluidRow(
+                     column(3,DT::dataTableOutput("p1Main_percentile")),
+                     column(3,DT::dataTableOutput("p1Secondary_percentile")),
+                     column(3, DT::dataTableOutput("p2Main_percentile")),
+                     column(3,DT::dataTableOutput("p2Secondary_percentile"))
+                 )
+        ),
+        
+        tabPanel("Profile Analysis II",
+                 fluidRow(column(12, 
+                                 h3("Considering the Top/Bottom Speeches"), 
+                                 h5(em("The below graphs help to better visualize what having high and low PC1 scores entails.
+                                       The larger scatterplot shows which exact speeches have the highest and lowest PC1 scores.
+                                       The dropdown menu allows the user to select the number of top/bottom speeches to highlight.
+                                       The boxplots beside that show how the rhetorical frequencies for the two profiles are distributed
+                                       between the top and bottom speeches. And the table to the far right helps understand what
+                                       proportion of those top and bottom speeches have frequency scores above a chosen percentile
+                                       for either profile.")))
+                 ),
+                 fluidRow(column(2,
+                                 radioButtons("tab3.choosePC", label = h5("Select a principle component"),
+                                              choices = c("PC 1" = "PC1", "PC 2" = "PC2"), inline = T)
+                 ),
+                 column(3,
+                        selectInput("chooseNumber", label = h5("Number of top/bottom points to display"),
+                                    choices = c("10" = 10, "20" = 20, "30" = 30))
+                 )),
                  fluidRow(
                      column(5,
-                            verbatimTextOutput("click_info"),
-                     )
-                 ),
-                 fluidRow(
-                     column(3, style = 'padding-right:0px;',
-                            plotOutput("profile1_main_plot", height = 500)
-                     ),
-                     column(3,
-                            plotOutput("profile1_secondary_plot", height = 500)),
-                     column(3, style = 'padding-right:0px;',
-                            plotOutput("profile2_main_plot", height = 500)
-                     ),
-                     column(3,
-                            plotOutput("profile2_secondary_plot", height = 500))
-                 ),
-                 fluidRow(
-                     column(6,
+                            plotlyOutput("sparsePlot_topbottom", height = 700)),
+                     column(2, 
+                            plotlyOutput("highlightTopMain"),
                             hr(),
-                            DT::dataTableOutput("profile1_percentile")),
-                     column(6,
+                            plotlyOutput("highlightBotMain")),
+                     column(2,
+                            # sliderInput("decimal", "Percentile",min = 50, max = 100, value = 50, step = 1),
+                            # DT::dataTableOutput("profileRatios")
+                            plotlyOutput("highlightTopSecondary"),
                             hr(),
-                            DT::dataTableOutput("profile2_percentile")
-                     )
+                            plotlyOutput("highlightBotSecondary")),
+                     column(3,
+                            sliderInput("decimal", "Main Profile Percentile",min = 50, max = 100, value = 50, step = 1),
+                            sliderInput("decimal2", "Secondary Profile Percentile",min = 0, max = 100, value = 50, step = 1),
+                            DT::dataTableOutput("profileRatios"))
                  )
         )
     )
@@ -283,14 +261,13 @@ ui <- fluidPage(
 
 
 
-
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
+    ## SCORES AND LOADINGS ##
     pc <- reactive({
         grep(input$loadingPC, colnames(loadings))
     })
-    
     output$loadingPlot <- renderPlot({
         order <- loadings %>% 
             arrange(desc(abs(loadings[,pc()])))
@@ -306,14 +283,12 @@ server <- function(input, output) {
             labs(title = "PC Loadings", x = "Rhetorical Cluster", y = "Loadings") + 
             ylim(-0.6, 0.8)
     })
-    
     output$loadingStats <- renderPrint({
         order <- loadings %>% 
             arrange(desc(abs(loadings[,pc()])))
         colnames(order) <- c("Clusters", "PC1 Loadings", "PC2 Loadings", "PC3 Loadings")
         order[1:15,c(1,pc())]
     })
-    
     output$scorePlot <- renderGirafe({
         ggpScore <- ggplot(scores, aes_string(x = "Comp.1", y = "Comp.2", tooltip = "X", data_id = "X_woq",
                                               color = input$chooseColor)) +
@@ -330,7 +305,6 @@ server <- function(input, output) {
                width_svg = 12, height_svg = 10
         ) 
     })
-    
     output$loadingSummary1 <- renderPrint({
         order1 <- loadings %>%
             arrange(desc(abs(loadings[,2])))
@@ -346,13 +320,13 @@ server <- function(input, output) {
         pc2
     })
     
+    ## PROFILE ANALYSIS I ##
+    # Sparse PC ggplotly scatterplot with Fulltag text on hover and event_data onclick #
     output$sparsePlot <- renderPlotly({
-        selected <- sparseScores %>%
-            filter(Fulltag == input$choosePoint)
-        
         ggp <- ggplot(sparseScores, aes(x = PC1, y = PC2, text = Fulltag)) +
-            geom_point(alpha = ifelse(sparseScores$Fulltag == input$choosePoint, 1, 0.6), color = ifelse(sparseScores$Fulltag == input$choosePoint, 'red', 'black'), size = ifelse(sparseScores$Fulltag == input$choosePoint, 3, 2)) +
-            # geom_point(data = selected, aes(x = PC1, y = PC2), color = "red", size = 2)
+            geom_point(alpha = ifelse(sparseScores$Fulltag == input$choosePoint, 1, 0.6), 
+                       color = ifelse(sparseScores$Fulltag == input$choosePoint, 'red', 'black'), 
+                       size = ifelse(sparseScores$Fulltag == input$choosePoint, 3, 2)) +
             theme_bw() +
             theme(
                 plot.title = element_text(size = 18, face = "bold"),
@@ -360,113 +334,344 @@ server <- function(input, output) {
                 legend.position = "bottom",
             ) +
             labs(title = "Sparse PCA Visualization", x = "PC1", y = "PC2")
-        
-        # girafe(code = {print(ggScore)},
-        #        options = list(opts_selection(type = "single", only_shiny = TRUE), opts_toolbar(saveaspng = FALSE)),
-        #        width_svg = 10, height_svg = 10
-        
-        # ) 
-        
         ggplotly(ggp, tooltip = "text")
     })
     
+    # Reactive #
+    # Reactive variable for selected speech Fulltag 
     speechSelect <- reactive({
         d <- event_data("plotly_click")
         pointNum <- d$pointNumber + 1
         sparseScores$X_woq[pointNum]
     })
+    # Reactive variable for row number of speech selected (based on speechSelect())
+    rowNum <- reactive({which(scoredSpeeches$Fulltag == speechSelect())})
     
-    output$click_info <- renderPrint({
-        cat(speechSelect())
+    # Print selected speech Fulltag as VerbatimTextOutput #
+    output$click_info <- renderPrint({cat(speechSelect())})
+    
+    # Boxplot creation functions #
+    tab2.mainBoxplotFunction <- function(PC1.data, PC2.data, PC1.profileName, PC2.profileName, PC1.ylim, PC2.ylim) {
+        # Base ggps using functions from top
+        PC1.ggp <- plot_mainProfile(PC1.data, paste(PC1.profileName, "Profile Frequencies"), PC1.ylim)
+        PC2.ggp <- plot_mainProfile(PC2.data, paste(PC2.profileName, "Profile Frequencies"), PC2.ylim)
+        # Conditional selection of profile ggp (plus gghighlight layer) based on PC selection 
+        ifelse(input$tab2.choosePC == "PC1", 
+               final.ggp <- PC1.ggp + gghighlight(PC1.data[,"Fulltag"] == speechSelect(), use_direct_label = F), 
+               final.ggp <- PC2.ggp + gghighlight(PC2.data[,"Fulltag"] == speechSelect(), use_direct_label = F))
+        final.ggp  
+    }
+    tab2.secondaryBoxplotFunction <- function(p.data, PC1.ylim, PC2.ylim) {
+        Secondary.ggp <- plot_secondaryProfile(p.data, ifelse(input$tab2.choosePC == "PC1", PC1.ylim, PC2.ylim))
+        Secondary.ggp + gghighlight(p.data[,"Fulltag"] == speechSelect(), use_direct_label = F)
+    }
+    
+    # Boxplot Renderings #
+    # Main cluster boxplots
+    output$profile1_main_plot <- renderPlot({tab2.mainBoxplotFunction(infoMain.melt, divisionMain.melt, "Info", "Division", 17, 6)})
+    output$profile2_main_plot <- renderPlot({tab2.mainBoxplotFunction(involveMain.melt, unityMain.melt, "Involvement", "Unity", 8, 15)})
+    # Secondary cluster boxplots
+    output$profile1_secondary_plot <- renderPlot({tab2.secondaryBoxplotFunction(p1Secondary.melt, 17, 6)})
+    output$profile2_secondary_plot <- renderPlot({tab2.secondaryBoxplotFunction(p2Secondary.melt, 8, 15)})
+    
+    # DT Functions #
+    # Main profile DT creation functions
+    ## DT creation function helper
+    tab2.mainDTFunction.helper <- function(d.PC, title, names, columns) {
+        pcPercentiles.main <- datatable(d.PC, rownames = F,
+                                        option = list(
+                                            pageLength = 1, dom = 't', 
+                                            columnDefs = list(list(className = "dt-center", targets = "_all"))), 
+                                        caption = htmltools::tags$caption(
+                                            style ='caption-side: top; text-align: center;', 
+                                            htmltools::strong(paste(title, 'Main Percentiles'))), 
+                                        colnames = names)
+        for(i in columns) {
+            pcPercentiles.main <- pcPercentiles.main %>% 
+                formatStyle(i, fontWeight = styleInterval(0.5, c('normal', 'bold')), 
+                            backgroundColor = styleInterval(0.49, c("none","maroon")),
+                            color = styleInterval(0.49, c("black","white")))
+        }
+        pcPercentiles.main
+    }
+    ## DT creation function
+    tab2.mainDTFunction <- function(columns.PC1, columns.PC2, d.PC1, d.PC2, colnames.PC1, colnames.PC2, title.PC1, title.PC2) {
+        pc1Percentiles.main <- tab2.mainDTFunction.helper(d.PC1, title.PC1, colnames.PC1, columns.PC1)
+        pc2Percentiles.main <- tab2.mainDTFunction.helper(d.PC2, title.PC2, colnames.PC2, columns.PC2)
+        ifelse(input$tab2.choosePC == "PC1", finaldt <- pc1Percentiles.main, finaldt <- pc2Percentiles.main)
+        finaldt
+    }
+    
+    # Secondary profile DT creation functions 
+    tab2.secondaryDTFunction <- function(d, profileNum, columns, formatNames) {
+        # Secondary cluster DT (same across PC1 and PC2)
+        pcPercentiles.secondary <- datatable(d, rownames = F,
+                                             option = list(pageLength = 1, dom = 't', 
+                                                           columnDefs = list(list(className = "dt-center", targets = "_all"))), caption = htmltools::tags$caption(
+                                                               style ='caption-side: top; text-align: center;', 
+                                                               htmltools::strong(paste('Profile', profileNum, 'Secondary Percentiles'))),
+                                             colnames = columns)
+        for(i in formatNames) {
+            pcPercentiles.secondary <- pcPercentiles.secondary %>%
+                formatStyle(i, fontWeight = styleInterval(0.5, c('normal', 'bold')), 
+                            backgroundColor = styleInterval(0.49, c("none","steelblue")),
+                            color = styleInterval(0.49, c("black","white")))  
+        }
+        pcPercentiles.secondary
+    }
+    
+    # DT Renderings #
+    # Main profile DTs (p1:info/division and p2:involvement/unity)
+    output$p1Main_percentile <- DT::renderDataTable({
+        tab2.mainDTFunction(
+            list('Academic_percentile', 'Public_percentile'), 
+            list('Privy_percentile', 'Contingency_percentile', 'Forceful_percentile'),
+            scoredSpeeches[rowNum(),37:38],
+            scoredSpeeches[rowNum(),48:50],
+            c("Academic", "Public"),
+            c("Privy", "Contingency", "Forceful"),
+            "Info",
+            "Division")
     })
-    
-    output$profile1_main_plot <- renderPlot({
-        p1main + gghighlight(p1main.melt$Fulltag == speechSelect(), use_direct_label = F) 
-    })
-    
-    output$profile1_secondary_plot <- renderPlot({
-        p1secondary + gghighlight(p1secondary.melt$Fulltag == speechSelect(), use_direct_label = F)
-    })
-    
-    output$profile2_main_plot <- renderPlot({
-        p2main + gghighlight(p2main.melt$Fulltag == speechSelect(), use_direct_label = F)
-    })
-    
-    output$profile2_secondary_plot <- renderPlot({
-        p2secondary + gghighlight(p2secondary.melt$Fulltag == speechSelect(), use_direct_label = F)
-    })
-    
-    # output$profile1_percentile <- renderPrint({
-    #     cat("Info Profile\nAcademic Percentile: ")
-    #     cat(SPEECHES$Academic_percentile[SPEECHES$Fulltag == speechSelect()])
-    #     cat("\nPublic Percentile: ")
-    #     cat(SPEECHES$Public_percentile[SPEECHES$Fulltag == speechSelect()])
-    # })
-    # 
-    # output$profile2_percentile <- renderPrint({
-    #     cat("Involvement Profile\nFirst Person Percentile: ")
-    #     cat(SPEECHES$FirstPerson_percentile[SPEECHES$Fulltag == speechSelect()])
-    #     cat("\nInteractive Percentile: ")
-    #     cat(SPEECHES$Interactive_percentile[SPEECHES$Fulltag == speechSelect()])
-    #     cat("\nReasoning Percentile: ")
-    #     cat(SPEECHES$Reasoning_percentile[SPEECHES$Fulltag == speechSelect()])
-    # })
-    
-    output$profile1_percentile <- DT::renderDataTable({
-        rowNum <- which(SPEECHES$Fulltag == speechSelect())
-        datatable(SPEECHES[rowNum,35:39], rownames = F,
-                  option = list(pageLength = 1, dom = 't', 
-                                columnDefs = list(list(className = "dt-center", targets = "_all"))), caption = htmltools::tags$caption(
-                                    style ='caption-side: top; text-align: center;', 
-                                    htmltools::strong('Info Profile Percentiles')),
-                  colnames = c("Academic", "Public", "Emotion_Negative", "Relations_Negative", "Values_Negative")) %>%
-            formatStyle('Academic_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","maroon")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Public_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","maroon")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Emotion_Negative_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Relations_Negative_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Values_Negative_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) 
+    output$p2Main_percentile <- DT::renderDataTable({
         
+        # Special case dataframe for Unity profile (only has 1 column and DT needs a 2-dim dataset)
+        m <- scoredSpeeches[rowNum(),c(51,39)]
+        d <- m[ ,1,drop = FALSE]
+        
+        tab2.mainDTFunction(
+            list('FirstPerson_percentile', 'Interactive_percentile', 'Reasoning_percentile'),
+            list('Persons_percentile'),
+            scoredSpeeches[rowNum(),39:41],
+            d,
+            c("First Person", "Interactive", "Reasoning"),
+            c("Persons"),
+            "Involvement",
+            "Unity")
     })
     
-    output$profile2_percentile <- DT::renderDataTable({
-        rowNum <- which(SPEECHES$Fulltag == speechSelect())
-        datatable(SPEECHES[rowNum,40:45], rownames = F,
-                  option = list(pageLength = 1, dom = 't',
-                                columnDefs = list(list(className = "dt-center", targets = "_all"))), 
+    # Secondary profile DTs
+    output$p1Secondary_percentile <- DT::renderDataTable({
+        tab2.secondaryDTFunction(
+            scoredSpeeches[rowNum(),c(42,44,46)],
+            "1",
+            c("Emotion (-)", "Relations (-)", "Values (-)"),
+            list('EmotionNeg_percentile', 'RelationsNeg_percentile', 'ValuesNeg_percentile'))
+    })
+    output$p2Secondary_percentile <- DT::renderDataTable({
+        tab2.secondaryDTFunction(
+            scoredSpeeches[rowNum(),c(43,45,47)],
+            "2",
+            c("Emotion (+)", "Relations (+)", "Values (+)"),
+            list('EmotionPos_percentile', 'RelationsPos_percentile', 'ValuesPos_percentile'))
+    })
+    
+    ## PROFILE ANALYSIS II ##
+    # Reactive PC scores #
+    # PC1 score cutoffs for top/bottom selected
+    PC1topAmount <- reactive({
+        ifelse(input$chooseNumber == 10, scoredSpeeches$PC1[10], ifelse(input$chooseNumber == 20,                                                                     scoredSpeeches$PC1[20], scoredSpeeches$PC1[30]))
+    })
+    PC1botAmount <- reactive({
+        ifelse(input$chooseNumber == 10, scoredSpeeches$PC1[449], ifelse(input$chooseNumber == 20, 
+                                                                         scoredSpeeches$PC1[439], scoredSpeeches$PC1[429]))
+    })
+    # PC2 score cutoffs for top/bottom selected
+    PC2topAmount <- reactive({
+        ifelse(input$chooseNumber == 10, orderPC2[10], ifelse(input$chooseNumber == 20, 
+                                                              orderPC2[20], orderPC2[30]))    
+    })
+    PC2botAmount <- reactive({
+        ifelse(input$chooseNumber == 10, orderPC2[449], ifelse(input$chooseNumber == 20, 
+                                                               orderPC2[439], orderPC2[429]))
+    })
+    
+    # Sparse PC2~PC1 ggplotly scatterplot with Fulltag on hover and top/bottom/middle highlighted #  
+    output$sparsePlot_topbottom <- renderPlotly({
+        
+        scoredSpeeches$Rank <- ifelse(input$tab3.choosePC == "PC1" & scoredSpeeches$PC1 >= PC1topAmount(), "Top", 
+                                      ifelse(input$tab3.choosePC == "PC1" & scoredSpeeches$PC1 <= PC1botAmount(), "Bottom", 
+                                             ifelse(input$tab3.choosePC == "PC2" & scoredSpeeches$PC2 >= PC2topAmount(), "Top",
+                                                    ifelse(input$tab3.choosePC == "PC2" & scoredSpeeches$PC2 <= PC2botAmount(), "Bottom", "Middle"))))
+        
+        ggp <- ggplot(scoredSpeeches, aes(x = PC1, y = PC2, text = Fulltag)) +
+            geom_point(aes(color = Rank, alpha = ifelse(Rank == "Top" | Rank == "Bottom", 1, 0.5)),
+                       size = 3) +
+            theme_bw() +
+            theme(
+                plot.title = element_text(size = 18, face = "bold"),
+                axis.title = element_text(size=16,face="bold"),
+                legend.position = "bottom",
+                legend.title = element_blank()
+            ) +
+            labs(title = ifelse(input$tab3.choosePC == "PC1", "Top/Bottom PC1 Scores (Sparse)", "Top/Bottom PC2 Scores (Sparse)"), x = "PC1", y = "PC2") +
+            scale_colour_manual(values=c(Bottom = "steelblue", Top = "maroon", Middle = "black"))
+        p1 <- ggplotly(ggp, tooltip = "text") %>%
+            layout(legend = list(
+                orientation = "h"
+            ))
+        p1
+    })
+    
+    # Boxplot render functions #
+    # Helper
+    tab3.mainBoxplotFunction.helper <- function(boxplot.d, title, geom.d, ylim) {
+        ggplot() +  
+            geom_boxplot(data = boxplot.d,
+                         aes(
+                             x = variable,
+                             y = value,
+                             text = Fulltag,
+                             alpha = 0.2),
+                         color = "grey") + 
+            ylim(0,ylim) +
+            labs(title = paste(title ,"Profile"), x = "Main Clusters", y = "Frequency") +
+            geom_point(data = geom.d,
+                       aes(
+                           x = variable,
+                           y = value,
+                           text = Fulltag),
+                       position = position_jitter(width = 0.1, height = 0), alpha = 1, color = ifelse(title == "Info" | title == "Division", "maroon", "steelblue"), size = 2) +
+            theme_bw() + 
+            theme(
+                plot.title = element_text(size = 14, face = "bold"),
+                axis.title = element_text(size=12)
+            )
+    }
+    # Main
+    tab3.mainBoxplotFunction <- function(pc1.boxplot.d, pc1.title, pc1.geom.d, pc1.ylim,
+                                         pc2.boxplot.d, pc2.title, pc2.geom.d, pc2.ylim) {
+        pc1.ggp <- tab3.mainBoxplotFunction.helper(pc1.boxplot.d, pc1.title, pc1.geom.d, pc1.ylim)
+        pc2.ggp <- tab3.mainBoxplotFunction.helper(pc2.boxplot.d, pc2.title, pc2.geom.d, pc2.ylim)
+        
+        ifelse(input$tab3.choosePC == "PC1", p <- ggplotly(pc1.ggp, tooltip = "text"), p <- ggplotly(pc2.ggp, tooltip = "text"))
+        
+        p$x$data[[1]]$marker$line$color = "grey"
+        p$x$data[[1]]$marker$outliercolor = "grey"
+        p$x$data[[1]]$marker$color = "grey"
+        p$x$data[[1]]$hoverinfo <- "none"
+        p
+    }
+    
+    # Boxplot renderings #
+    output$highlightTopMain <- renderPlotly({
+        tab3.mainBoxplotFunction(infoMain.melt, "Info", infoMain.melt[infoMain.melt$PC1 >= PC1topAmount(),], 17,
+                                 divisionMain.melt, "Division", divisionMain.melt[divisionMain.melt$PC2 >= PC2topAmount(),], 6)
+    })
+    output$highlightBotMain <- renderPlotly({
+        tab3.mainBoxplotFunction(involveMain.melt, "Involvement", involveMain.melt[involveMain.melt$PC1 <= PC1botAmount(),], 8,
+                                 unityMain.melt, "Unity", unityMain.melt[unityMain.melt$PC2 <= PC2botAmount(),], 15)
+    })
+    output$highlightTopSecondary <- renderPlotly({
+        infoSecondary.ggp <- ggplot() +  
+            geom_boxplot(data = p1Secondary.melt,
+                         aes(
+                             x = variable,
+                             y = value,
+                             alpha = 0.2),
+                         color = "grey") + 
+            ylim(0,ifelse(input$tab3.choosePC == "PC1", 17, 7)) +
+            labs(title = " ", x = "Secondary Clusters") +
+            geom_point(data = p1Secondary.melt[p1Secondary.melt$PC1 >= PC1topAmount(),],
+                       aes(
+                           x = variable,
+                           y = value,
+                           text = Fulltag),
+                       position = position_jitter(width = 0.1, height = 0), alpha = 1, color = "maroon", size = 2) +
+            theme_bw() + 
+            theme(
+                plot.title = element_text(size = 14, face = "bold"),
+                axis.text.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                axis.title.y = element_blank()
+            )
+        
+        p <- ggplotly(infoSecondary.ggp, tooltip = "text")  
+        
+        p$x$data[[1]]$marker$line$color = "grey"
+        p$x$data[[1]]$marker$outliercolor = "grey"
+        p$x$data[[1]]$marker$color = "grey"
+        p$x$data[[1]]$hoverinfo <- "none"
+        p
+    })
+    output$highlightBotSecondary <- renderPlotly({
+        involveMain.ggp <- ggplot() +  
+            geom_boxplot(data = p2Secondary.melt,
+                         aes(
+                             x = variable,
+                             y = value
+                             
+                         ),
+                         
+                         color = "grey") + 
+            ylim(0,ifelse(input$tab3.choosePC == "PC1", 8, 15)) +
+            labs(title = " ", x = "Secondary Clusters") +
+            geom_point(data = p2Secondary.melt[p2Secondary.melt$PC1 <= PC1botAmount(),],
+                       aes(
+                           x = variable,
+                           y = value,
+                           text = Fulltag),
+                       position = position_jitter(width = 0.1, height = 0), alpha = 1, color = "steelblue", size = 2) +
+            theme_bw() + 
+            theme(
+                plot.title = element_text(size = 14, face = "bold"),
+                axis.text.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                axis.title.y = element_blank()
+            )
+        
+        p <- ggplotly(involveMain.ggp, tooltip = "text")
+        
+        p$x$data[[1]]$marker$line$color = "grey"
+        p$x$data[[1]]$marker$outliercolor = "grey"
+        p$x$data[[1]]$marker$color = "grey"
+        p$x$data[[1]]$hoverinfo <- "none"
+        p
+    })
+    
+    # Percentage matched DT #
+    output$profileRatios <- DT::renderDataTable({
+        
+        scoredSpeeches$Rank <- ifelse(scoredSpeeches$PC1 >= PC1topAmount(), "Top", ifelse(scoredSpeeches$PC1 <= PC1botAmount(), "Bottom", "Middle"))
+        
+        topCount <- length(which(scoredSpeeches$Rank == "Top"))
+        topProfileCount <- length(which(scoredSpeeches$Rank == "Top" & (scoredSpeeches$Academic_percentile >= input$decimal/100 | 
+                                                                            scoredSpeeches$Public_percentile >= input$decimal/100 |
+                                                                            scoredSpeeches$EmotionNeg_percentile >= input$decimal2/100 |
+                                                                            scoredSpeeches$RelationsNeg_percentile >= input$decimal2/100 |
+                                                                            scoredSpeeches$ValuesNeg_percentile >= input$decimal2/100)))
+        
+        
+        topRatio <- (topProfileCount)/topCount
+        
+        botCount <- length(which(scoredSpeeches$Rank == "Bottom"))
+        botProfileCount <- length(which(scoredSpeeches$Rank == "Bottom" & (scoredSpeeches$FirstPerson_percentile >= input$decimal/100 | 
+                                                                               scoredSpeeches$Interactive_percentile >= input$decimal/100 | 
+                                                                               scoredSpeeches$Reasoning_percentile >= input$decimal/100 |
+                                                                               scoredSpeeches$EmotionPos_percentile >= input$decimal2/100 |
+                                                                               scoredSpeeches$RelationsPos_percentile >= input$decimal2/100 |
+                                                                               scoredSpeeches$ValuesPos_percentile >= input$decimal2/100
+        )))
+        
+        botRatio <- botProfileCount/botCount
+        
+        m <- matrix(c(topRatio, "", "", botRatio), ncol = 2, byrow = TRUE)
+        rownames(m) <- c("Top", "Bottom")
+        colnames(m) <- c("Information", "Involvement")
+        
+        datatable(m, option = list(pageLength = 2, dom = 't', autoWidth = T,
+                                   columnDefs = list(list(className = "dt-center", targets = "_all"))),
                   caption = htmltools::tags$caption(
                       style ='caption-side: top; text-align: center;', 
-                      htmltools::strong('Involvement Profile Percentiles')),
-                  colnames = c("First Person", "Interactive", "Reasoning", "Emotion_Positive", "Relations_Positive", "Values_Positive")) %>%
-            formatStyle('FirstPerson_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","maroon")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Interactive_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","maroon")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Reasoning_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","maroon")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Emotion_Positive_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Relations_Positive_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) %>%
-            formatStyle('Values_Positive_percentile', fontWeight = styleInterval(0.5, c('normal', 'bold')), 
-                        backgroundColor = styleInterval(0.49, c("none","steelblue")),
-                        color = styleInterval(0.49, c("black","white"))) 
-        
+                      htmltools::strong('Percentage Matched'))) %>%
+            formatStyle("Information",
+                        backgroundColor = styleEqual("", "gray", "none")) %>%
+            formatStyle("Involvement",
+                        backgroundColor = styleEqual("", "grey", "none"))
     })
+    
+    
+    
 }
 
 # Run the application 
