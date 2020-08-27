@@ -1,0 +1,738 @@
+library(shiny)
+library(ggplot2)
+library(tidyverse)
+library(reshape2)
+library(ggpubr)
+library(gghighlight)
+
+for (i in 1:7) {
+    temp.df <- read.csv(url(
+        paste("https://raw.githubusercontent.com/xizhen-cai/RhetoricalAnalysis/master/study",as.character(i),".csv",sep="")))
+    
+    temp.df <- temp.df[,-1]
+    colnames(temp.df)[1] <- "Speech"
+    colnames(temp.df)[2] <- "Academic"
+    colnames(temp.df)[7] <- "Elaborative"
+    colnames(temp.df)[8] <- "EmotionPos"
+    colnames(temp.df)[9] <- "EmotionNeg"
+    colnames(temp.df)[21] <- "Personal"
+    colnames(temp.df)[24] <- "RelationsPos"
+    colnames(temp.df)[25] <- "RelationsNeg"
+    colnames(temp.df)[28] <- "ValuesPos"
+    colnames(temp.df)[29] <- "ValuesNeg"
+    
+    assign(paste("study",as.character(i),sep=""),temp.df)
+}
+
+colnames(study6)[31] <- "Type"
+
+ggp.init.coreOnly <- function(d.core, y.axis, t) {
+    ggplot(
+        data = d.core, 
+        aes(variable, value)) +
+        geom_boxplot(
+            fill = "grey"
+        ) +
+        theme_bw() +
+        theme(axis.text = element_text(size=12),
+              axis.title = element_text(size=13),
+              legend.text = element_text(size=13),
+              legend.title = element_text(size=13))+
+        # gghighlight() + 
+        ylim(y.axis) +
+        xlab("Clusters") +
+        ylab("Frequency") +
+        labs(title = t)
+}
+
+ggp.init.coreOnly.pc <- function(d.core, y.axis, t) {
+    ggplot(
+        data = d.core, 
+        aes(variable, value)) +
+        geom_boxplot(
+            fill = "grey"
+        ) +
+        theme_bw() +
+        theme(axis.text = element_text(size=12),
+              axis.title = element_text(size=13),
+              legend.text = element_text(size=13),
+              legend.title = element_text(size=13))+
+        # gghighlight() + 
+        ylim(y.axis) +
+        xlab("Clusters") +
+        ylab("Frequency") +
+        labs(title = t)
+}
+
+ggp.init.coreOnly.pc.scale <- function(d.core, y.axis, t, s) {
+    ggplot(
+        data = d.core, 
+        aes(variable, value)) +
+        geom_boxplot(
+            fill = "grey"
+        ) +
+        theme_bw() +
+        theme(axis.text = element_text(size=12),
+              axis.title = element_text(size=13),
+              legend.text = element_text(size=13),
+              legend.title = element_text(size=13))+
+        ylim(y.axis) +
+        xlab("Clusters") +
+        ylab("Frequency") +
+        labs(title = t) +
+        scale_x_discrete(labels = s)
+}
+
+# ggp.init.speaker <- function(d.core.box, d.core.jitter, d.study.box, d.study.jitter, c, y.axis, t, w) {
+#     core_ggp <- ggplot(data = d.core.box,
+#                        aes(variable, value)) +
+#         geom_boxplot() +
+#         geom_jitter(data = d.core.jitter,
+#                     aes(x=variable,y=value), color=c) +
+#         theme_bw() + 
+#         # gghighlight() + 
+#         ylim(y.axis) +
+#         xlab("Core Clusters") +
+#         ylab("Frequency")
+#     
+#     study_ggp <- ggplot(data = d.study.box, aes(variable, value)) +
+#         geom_boxplot(
+#             # color = "red"
+#         ) + 
+#         geom_jitter(data = d.study.jitter,
+#                     aes(x=variable,y=value), color=c) +
+#         theme_bw() +
+#         theme(
+#             axis.title.y = element_blank(),
+#             axis.text.y = element_blank(),
+#             axis.ticks.y = element_blank()) + 
+#         # gghighlight() +
+#         ylim(y.axis) +
+#         xlab("Study Clusters")
+# 
+# annotate_figure(
+#     ggarrange(core_ggp, study_ggp, widths = w),
+#     core_ggp,
+#     top = text_grob(t))
+# }
+
+ggp.compare <- function(d,y,t) {
+    ggplot(data = d, aes(variable, value, fill=Type)) +
+        geom_boxplot() +
+        theme_bw() +
+        theme(legend.position = "bottom",
+              # legend.key.size = 10,
+              axis.text = element_text(size=12),
+              axis.title = element_text(size=13),
+              # axis.text.x = element_text(angle = 90)
+              legend.text = element_text(size = 13),
+              legend.title = element_text(size = 13)) +
+        ylim(y) +
+        labs(x ="Clusters",y ="Frequency",title = t) 
+}
+
+ggp.compare.pc <- function(d,y,t) {
+    ggplot(data = d, aes(variable, value, fill=Type)) +
+        geom_boxplot() +
+        theme_bw() +
+        theme(legend.position = "bottom",
+              # legend.key.size = 10,
+              axis.text = element_text(size=12),
+              axis.title = element_text(size=13),
+              # axis.text.x = element_text(angle = 90)
+              legend.text = element_text(size = 13),
+              legend.title = element_text(size = 13)) +
+        ylim(y) +
+        labs(x="Clusters",y="Frequency",title=t) 
+}
+
+
+
+ggp.compare.a <- function(d,y,t,a) {
+    ggplot(data = d, aes(variable, value, fill=Type)) +
+        geom_boxplot(aes(alpha=factor(variable))) +
+        scale_alpha_manual(values=a, guide = 'none') +
+        theme_bw() +
+        theme(legend.position = "bottom",
+              axis.text = element_text(size = 12),
+              axis.title = element_text(size=13),
+              legend.text = element_text(size=13),
+              legend.title = element_text(size=13)) +
+        ylim(y) +
+        labs(x ="Clusters",y ="Frequency",title = t)
+}
+
+ggp.compare.a.pc <- function(d,y,t,a) {
+    ggplot(data = d, aes(variable, value, fill=Type)) +
+        geom_boxplot(aes(alpha=factor(variable))) +
+        scale_alpha_manual(values=a, guide = 'none') +
+        theme_bw() +
+        theme(legend.position = "bottom",
+              axis.text = element_text(size = 12),
+              axis.title = element_text(size=13),
+              legend.text = element_text(size=13),
+              legend.title = element_text(size=13)) +
+        ylim(y) +
+        labs(x = "Clusters",y ="Frequency",title = t)
+}
+
+study1_melt <- melt(study1, id = c(1,31), measure = c(
+    # Info
+    "Academic", "Public", "Elaborative", "ValuesPos",
+    # Involvement
+    "FirstPerson", "Interactive", "Reasoning", "Forceful"))
+
+study2_melt <- melt(study2, id = c(1,31), measure = c(
+    "Academic", "Public", "Elaborative","ValuesNeg",
+    "FirstPerson", "Interactive", "Reasoning"
+))
+
+study3_melt <- melt(study3, id = 1, measure = c(
+    "Academic", "Public", "EmotionNeg", "RelationsNeg", "ValuesNeg", "Strategic", "Future",
+    "FirstPerson", "Interactive", "Reasoning", "EmotionPos", "RelationsPos", "ValuesPos",
+    "Contingency", "Forceful", "Personal",
+    "Persons",
+    "Narrative", "Past"
+))
+
+study4_melt <- melt(study4, id = 1, measure = c(
+    "Academic", "Public", "EmotionNeg", "RelationsNeg", "ValuesNeg",
+    "FirstPerson", "Interactive", "Reasoning", "Future",
+    "Contingency", "Forceful", "Personal", 
+    "EmotionPos", "RelationsPos"))
+
+#Info - Obama, Involvement - Clinton
+study5_melt <- melt(study5, id = c(1,31), measure = c(
+    "Academic", "Public", "Strategic", "EmotionNeg", "RelationsNeg", "ValuesNeg",
+    "Interactive", "FirstPerson", "Reasoning","EmotionPos", "RelationsPos", "ValuesPos",
+    # Litigator
+    "Past", "Forceful", "Citation",
+    "Narrative", "Past", "Personal", "Future", "Interactive"))
+
+# #Info - Sanders, Involvement - Clinton
+study6_melt <- melt(study6, id = c(1,31), measure = c(
+    "Academic", "Public", "EmotionNeg", "RelationsNeg", "ValuesNeg", "Elaborative", "Expository_Devices",
+    "FirstPerson", "Interactive", "Reasoning", "Future", "Contingency",
+    "EmotionPos", "ValuesPos", "Citation", "RelationsPos",
+    "Narrative", "Past", "Persons", "Personal", "Inquiry", "Emotion_Surprise","Expository_Devices","Metadiscourse"))
+
+# study 7 speeches profiles: involve - first person/reasoning; info - public
+study7_melt <- melt(study7, id = c(1,31), measure = c(
+    "Public", "Elaborative", "ValuesNeg", "Expository_Devices", 
+    "Future", "Academic", "Contingency", "Strategic", "Interactive", "EmotionNeg",
+    "FirstPerson", "Reasoning", "Personal",
+    "EmotionPos", "RelationsPos", "ValuesPos",
+    "Emotion_Surprise", "Forceful"))
+
+#first person, reasoning - involve
+#public - info
+# study7_melt <- melt(study7, id = c(1,31), measure = c(
+#     "Academic", "Public", "Elaborative", "Strategic", ""
+# ))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    titlePanel("Profile Visualization Over Studies"),
+    hr(),
+    tabsetPanel(
+        tabPanel("Core",
+                 fluidRow(column(12,
+                                 h3("Core Variables"),
+                                 h5(em("The below plots illustrate the distributions of the core profile 
+                                       clusters across the seven studies, distinguished by 'Type'. 
+                                       ote that studies 3 and 4 do not have 'Type' categories.
+                                       Study, Chapter, and Principle Component  are listed in the title"))
+                 )),
+                 fluidRow(
+                     column(5, selectInput("profile", label = h5("Select a profile"), 
+                                           choices = c("Information", "Involvement", "Division", "Unity", "Litigator", "Narrative")))),
+                 fluidRow(
+                     column(3, plotOutput("s1")),
+                     column(3, plotOutput("s2")),
+                     column(3, plotOutput("s3")),
+                     column(3, plotOutput("s4"))
+                 ),
+                 fluidRow(
+                     column(3, plotOutput("s5")),
+                     column(3, plotOutput("s6")),
+                     column(3, plotOutput("s7"))
+                 )),
+        tabPanel("Non-Core",
+                 fluidRow(column(12,
+                                 h3("Non-Core Variables"),
+                                 h5(em("The below plots show the study-specific/valence profile clusters 
+                                       distinguished across 'Type'. Note that Study 2's involvement profile has 
+                                       no non-core clusters. Again, studies 3 and 4 do not have 'Type' distinctions.
+                                       For Study 7, the study-specific clusters were taken from only the first 
+                                       principle component. Since multiple principle components sometimes contain
+                                       clusters of the same non-core profile, Principle Components are labeled
+                                       on the horizontal axis."))
+                 )),
+                 fluidRow(
+                     column(5, selectInput("selectProfile", label = h5("Select a profile"),
+                                           choices = c("Information", "Involvement", "Division", "Unity", "Litigator", "Narrative")))),
+                 fluidRow(
+                     column(3, plotOutput("Study1")),
+                     column(3, plotOutput("Study2")),
+                     column(3, plotOutput("Study3")),
+                     column(3, plotOutput("Study4"))
+                 ),
+                 fluidRow(
+                     column(3, plotOutput("Study5")),
+                     column(3, plotOutput("Study6")),
+                     column(5, plotOutput("Study7"))
+                 ))
+        
+    )
+    
+    
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+    
+    #TAB 1    
+    output$s1 <- renderPlot({
+        info.1 <- ggp.compare(
+            subset(study1_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 1 (Ch.1) - PC1")  
+        
+        involve.1 <- ggp.compare(
+            subset(study1_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 1 (Ch.1) - PC1")
+        
+        if(input$profile == "Information") return(info.1)
+        if(input$profile == "Involvement") return(involve.1)
+    })
+    
+    output$s2 <- renderPlot({
+        info.2 <- ggp.compare(
+            subset(study2_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 2 (Ch.1) - PC1")  
+        
+        involve.2 <- ggp.compare(
+            subset(study2_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 2 (Ch.1) - PC1")
+        
+        if(input$profile == "Information") return(info.2)
+        if(input$profile == "Involvement") return(involve.2)
+    })
+    
+    output$s3 <- renderPlot({
+        info.3 <- ggp.init.coreOnly(
+            subset(study3_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 3 (Ch. 2) - PC1")  
+        
+        involve.3 <- ggp.init.coreOnly(
+            subset(study3_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 3 (Ch. 2) - PC1")
+        
+        division.3 <- ggp.init.coreOnly(
+            study3_melt[study3_melt$variable == c("RelationsNeg", "EmotionNeg"),],
+            c(0,8),
+            "Study 3 (Ch. 2) - PC2")
+        
+        unity.3 <- ggp.init.coreOnly(
+            study3_melt[study3_melt$variable == c("ValuesPos", "RelationsPos", "EmotionPos"),],
+            c(0,10),
+            "Study 3 (Ch. 2) - PC2")
+        narrative.3 <- ggp.init.coreOnly(
+            study3_melt[study3_melt$variable == "Narrative",],
+            c(0,10),
+            "Study 3 (Ch. 2) - PC3")
+        
+        if(input$profile == "Information") return(info.3)
+        if(input$profile == "Involvement") return(involve.3)
+        if(input$profile == "Division") return(division.3)
+        if(input$profile == "Unity") return(unity.3)
+        if(input$profile == "Narrative") return(narrative.3)
+    })
+    
+    output$s4 <- renderPlot({
+        info.4 <- ggp.init.coreOnly(
+            subset(study4_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 4 (Ch. 3) - PC1")  
+        
+        involve.4 <- ggp.init.coreOnly(
+            subset(study4_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 4 (Ch. 3) - PC1")
+        
+        division.4 <- ggp.init.coreOnly(
+            study4_melt[study4_melt$variable == c("EmotionNeg", "ValuesNeg"),],
+            c(0,8),
+            "Study 4 (Ch. 3) - PC2")
+        
+        unity.4 <- ggp.init.coreOnly(
+            study4_melt[study4_melt$variable == c("EmotionPos", "RelationsPos"),],
+            c(0,10),
+            "Study 4 (Ch. 3) - PC2")
+        
+        if(input$profile == "Information") return(info.4)
+        if(input$profile == "Involvement") return(involve.4)
+        if(input$profile == "Division") return(division.4)
+        if(input$profile == "Unity") return(unity.4)
+    })
+    
+    output$s5 <- renderPlot({
+        info.5 <- ggp.compare(
+            subset(study5_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 5 (Ch. 4) - PC1")  
+        
+        involve.5 <- ggp.compare(
+            subset(study5_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 5 (Ch. 4) - PC1")
+        
+        litigator.5 <- ggp.compare(
+            subset(study5_melt, variable %in% c("FirstPerson", "Forceful", "Past")),
+            c(0,10),
+            "Study 5 (Ch. 4) - PC3")
+        
+        narrative.5 <- ggp.compare(
+            subset(study5_melt, variable %in% c("Narrative")),
+            c(0,10),
+            "Study 5 (Ch. 4) - PC2/PC3")
+        
+        if(input$profile == "Information") return(info.5)
+        if(input$profile == "Involvement") return(involve.5)
+        if(input$profile == "Litigator") return(litigator.5)
+        if(input$profile == "Narrative") return(narrative.5)
+        
+    })
+    
+    output$s6 <- renderPlot({
+        info.6 <- ggp.compare(
+            subset(study6_melt, variable %in% c("Academic", "Public")),
+            c(0,17),
+            "Study 6 (Ch. 5) - PC1")  
+        
+        involve.6 <- ggp.compare(
+            subset(study6_melt, variable %in% c("FirstPerson", "Interactive", "Reasoning")), 
+            c(0,13),
+            "Study 6 (Ch. 5) - PC1")
+        
+        division.6 <- ggp.compare(
+            study6_melt[study6_melt$variable == c("EmotionNeg", "RelationsNeg", "ValuesNeg"),],
+            c(0,8),
+            "Study 6 (Ch. 5) - PC2/PC3")
+        
+        unity.6 <- ggp.compare(
+            study6_melt[study6_melt$variable == c("EmotionPos", "ValuesPos"),],
+            c(0,10),
+            "Study 6 (Ch. 5) - PC3")
+        
+        narrative.6 <- ggp.compare(
+            study6_melt[study6_melt$variable == c("Narrative"),],
+            c(0,10),
+            "Study 6 (Ch. 5) - PC2")
+        
+        if(input$profile == "Information") return(info.6)
+        if(input$profile == "Involvement") return(involve.6)
+        if(input$profile == "Division") return(division.6)
+        if(input$profile == "Unity") return(unity.6)
+        if(input$profile == "Narrative") return(narrative.6)
+        
+    })
+    
+    output$s7 <- renderPlot({
+        info.7 <- ggp.compare(
+            subset(study7_melt, variable %in% c("Public")),
+            c(0,17),
+            "Study 7 (Ch. 5) - PC1")  
+        
+        involve.7 <- ggp.compare(
+            subset(study7_melt, variable %in% c("FirstPerson", "Reasoning")), 
+            c(0,13),
+            "Study 7 (Ch. 5) - PC1")
+        
+        unity.7 <- ggp.compare(
+            study7_melt[study7_melt$variable == c("EmotionPos", "RelationsPos", "ValuesPos"),],
+            c(0,10),
+            "Study 7 (Ch. 5) - PC2")
+        
+        if(input$profile == "Information") return(info.7)
+        if(input$profile == "Involvement") return(involve.7)
+        if(input$profile == "Unity") return(unity.7)
+    })
+    
+    #TAB 2
+    alpha <- 0.1
+    
+    output$Study1 <- renderPlot({
+
+    })
+    
+    output$Study2 <- renderPlot({
+
+    })
+    
+    output$Study3 <- renderPlot({
+        
+        ## Information strategy in PC3 ##
+        info.3 <- ggarrange(
+            ggp.init.coreOnly.pc.scale(
+                subset(study3_melt, variable %in% c("EmotionNeg", "RelationsNeg", "ValuesNeg")),
+                c(0,17),
+                "Study 3 (Ch.2) - PC1",
+                c("EmotNeg", "RelNeg", "ValNeg")),
+            (ggplot(
+                data = subset(study3_melt, variable %in% c("Strategic", "Future")), 
+                aes(variable, value)) +
+                 geom_boxplot(
+                     fill = "grey"
+                 ) +
+                 theme_bw() +
+                 theme(axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,17)) +
+                 xlab("Clusters") +
+                 labs(title = "Study 3 (Ch.2) - PC3")),
+            widths = c(3,2))
+        
+        involve.3 <- ggp.init.coreOnly.pc(
+            subset(study3_melt, variable %in% c("EmotionPos", "RelationsPos")), 
+            c(0,13),
+            "Study 3 (Ch.2) - PC1")
+        
+        division.3 <- ggp.init.coreOnly.pc(
+            subset(study3_melt, variable %in% c("Personal", "Contingency", "Forceful")), 
+            c(0,8),
+            "Study 3 (Ch.2) - PC2")
+        
+        unity.3 <- ggp.init.coreOnly.pc(
+            subset(study3_melt, variable %in% c("Persons")), 
+            c(0,15),
+            "Study 3 (Ch.2) - PC2")
+        
+        narrative.3 <- ggp.init.coreOnly.pc(
+            subset(study3_melt, variable %in% c("Persons", "Past", "EmotionPos")),
+            c(0,15),
+            "Study 3 (Ch.2) - PC3")
+        
+        if(input$selectProfile == "Information") return(info.3)
+        if(input$selectProfile == "Involvement") return(involve.3)
+        if(input$selectProfile == "Division") return(division.3)
+        if(input$selectProfile == "Unity") return(unity.3)
+        if(input$selectProfile == "Narrative") return(narrative.3)
+        
+    })
+    
+    output$Study4 <- renderPlot({
+        
+        info.4 <- ggp.init.coreOnly.pc(
+            subset(study4_melt, variable %in% c("EmotionNeg", "ValuesNeg")),
+            c(0,17),
+            "Study 4 (Ch.3) - PC1")  
+        
+        involve.4 <- ggp.init.coreOnly.pc(
+            subset(study4_melt, variable %in% c("Future")), 
+            c(0,13),
+            "Study 4 (Ch.3) - PC1")
+        
+        division.4 <- ggp.init.coreOnly.pc(
+            subset(study4_melt, variable %in% c("Contingency", "Forceful", "Personal")), 
+            c(0,8),
+            "Study 4 (Ch.3) - PC2")
+        
+        unity.4 <- ggp.init.coreOnly.pc(
+            subset(study4_melt, variable %in% c("FirstPerson", "Future")), 
+            c(0,15),
+            "Study 4 (Ch.3) - PC2")
+        
+        if(input$selectProfile == "Information") return(info.4)
+        if(input$selectProfile == "Involvement") return(involve.4)
+        if(input$selectProfile == "Division") return(division.4)
+        if(input$selectProfile == "Unity") return(unity.4)
+    })
+    
+    output$Study5 <- renderPlot({
+        info.5 <- ggp.compare.pc(
+            subset(study5_melt, variable %in% c("Strategic", "EmotionNeg", "RelationsNeg", "ValuesNeg")),
+            c(0,17),
+            "Study 5 (Ch.4) - PC1")
+        
+        involve.5 <- ggp.compare.pc(
+            subset(study5_melt, variable %in% c("EmotionPos", "RelationsPos")), 
+            c(0,13),
+            "Study 5 (Ch.4) - PC1")
+        
+        
+        narrative.5 <- ggarrange(
+            ggp.compare.pc(
+                subset(study5_melt, variable %in% c("Past", "Personal", "RelationsNeg")),
+                c(0,15),
+                "Study 5 (Ch.4) - PC2"),
+            (ggplot(data = subset(study5_melt, variable %in% c("Future", "Interactive")),
+                    aes(variable, value, fill=Type)) +
+                 geom_boxplot() +
+                 theme_bw() +
+                 theme(legend.position = "bottom",
+                       axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       legend.text = element_text(size = 13),
+                       legend.title = element_text(size = 13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,15)) +
+                 labs(x="Clusters",title="Study 5 (Ch.4) - PC3")
+            ),
+            common.legend = T,
+            legend = "bottom",
+            widths = c(3,2)
+        )
+        
+        if(input$selectProfile == "Information") return(info.5)
+        if(input$selectProfile == "Involvement") return(involve.5)
+        if(input$selectProfile == "Narrative") return(narrative.5)
+        
+    })
+    
+    output$Study6 <- renderPlot({
+        info.6 <- ggp.compare.a.pc(
+            subset(study6_melt, variable %in% c("EmotionNeg","ValuesNeg")),
+            c(0,17),
+            "Study 6 (Ch.5) - PC1",
+            c("EmotionNeg"=1,"ValuesNeg"=1, "Elaborative"=alpha, "Expository_Devices"=alpha))
+        
+        division.6 <- ggarrange(
+            ggp.compare.a(
+                subset(study6_melt, variable %in% c("Future", "RelationsPos")), 
+                c(0,13),
+                "Study 6 (Ch.5) - PC2",
+                c("Future"=1, "Elaborative"=alpha, "RelationsPos" = 1)),
+            # personal people?
+            (ggplot(data = subset(study6_melt, variable %in% c("Personal", "Persons")),
+                    aes(variable, value, fill=Type)) +
+                 geom_boxplot() +
+                 theme_bw() +
+                 theme(legend.position = "bottom",
+                       axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       legend.text = element_text(size = 13),
+                       legend.title = element_text(size = 13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,13)) +
+                 labs(x="Clusters",title="Study 6 (Ch.5) - PC3")),
+            widths = c(3,2),
+            common.legend = T,
+            legend = "bottom")
+        
+        unity.6 <- ggp.compare.a.pc(
+            subset(study6_melt, variable %in% c("Public")), 
+            c(0,15),
+            "Study 6 (Ch.5) - PC3",
+            c("Citation"=alpha, "Public"=1))
+        
+        narrative.6 <- ggp.compare.a.pc(
+            subset(study6_melt, variable %in% c("Past", "Persons")),
+            c(0,15),
+            "Study 6 (Ch.5) - PC2",
+            c("Past"=1, "Persons"=1, "Inquiry"=alpha, "Emotion_Surprise"=alpha, "Expository"=alpha, "Metadiscourse"=alpha))
+        
+        if(input$selectProfile == "Information") return(info.6)
+        if(input$selectProfile == "Division") return(division.6)
+        if(input$selectProfile == "Unity") return(unity.6)
+        if(input$selectProfile == "Narrative") return(narrative.6)
+    })
+    
+    output$Study7 <- renderPlot({
+        
+        info.7 <- ggarrange(
+            ggplot(data = subset(study7_melt, variable %in% c("ValuesNeg", "Future")),
+                   aes(variable, value, fill=Type)) +
+                geom_boxplot(aes(alpha=factor(variable))) +
+                scale_alpha_manual(values=c("Elaborative"=alpha, "ValuesNeg"=1, "Expository_Devices"=alpha, "Future"=1), guide = 'none') +
+                theme_bw() +
+                theme(legend.position = "bottom",
+                      axis.text = element_text(size = 12),
+                      axis.title = element_text(size=13),
+                      legend.text = element_text(size=13),
+                      legend.title = element_text(size=13)) +
+                ylim(c(0,17)) +
+                labs(x = "Clusters",y ="Frequency",title = "Study 7 (Ch.5) - PC1") +
+                scale_x_discrete(labels = c("Elab.", "ValNeg", "Expos.", "Future")),
+            (ggplot(subset(study7_melt, variable %in% c("Academic", "Contingency", "Strategic")),
+                    aes(variable, value, fill=Type)) +
+                 geom_boxplot() +
+                 theme_bw() +
+                 theme(legend.position = "bottom",
+                       axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       legend.text = element_text(size = 13),
+                       legend.title = element_text(size = 13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,17)) +
+                 scale_x_discrete(labels = c("Academic", "Contin.", "Strat.")) +
+                 labs(x="Clusters",title="Study 7 (Ch.5) - PC3")),
+            widths = c(4,3),
+            common.legend = T,
+            legend = "bottom"
+        )
+        
+        involve.7 <- ggarrange(
+            ggp.compare(
+                subset(study7_melt, variable %in% c("Personal")), 
+                c(0,13),
+                "Study 7 (Ch.5) - PC1"),
+            (ggplot(subset(study7_melt, variable %in% c("Interactive", "EmotionNeg", "ValuesNeg")),
+                    aes(variable, value, fill=Type)) +
+                 geom_boxplot() +
+                 theme_bw() +
+                 theme(legend.position = "bottom",
+                       axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       legend.text = element_text(size = 13),
+                       legend.title = element_text(size = 13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,13)) +
+                 labs(x="Clusters",title="PC2")),
+            (ggplot(subset(study7_melt, variable %in% c("Forceful", "RelationsPos")),
+                    aes(variable, value, fill=Type)) +
+                 geom_boxplot() +
+                 scale_alpha_manual(values=c("Emotion_Surprise" = alpha, "RelationsPos" = 1, "Interactive" = 1),
+                                    guide = 'none') +
+                 theme_bw() +
+                 scale_x_discrete(labels = c("Surprise", "RelPos", "Interactive")) +
+                 theme(legend.position = "bottom",
+                       axis.text = element_text(size=12),
+                       axis.title = element_text(size=13),
+                       legend.text = element_text(size = 13),
+                       legend.title = element_text(size = 13),
+                       axis.title.y = element_blank(),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank()) +
+                 ylim(c(0,13)) +
+                 labs(x="Clusters",title="PC3")),
+            widths = c(2,3,3),
+            ncol = 3,
+            nrow = 1,
+            common.legend = T,
+            legend = "bottom")
+
+        
+        if(input$selectProfile == "Information") return(info.7)
+        if(input$selectProfile == "Involvement") return(involve.7)
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
